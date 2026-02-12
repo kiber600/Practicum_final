@@ -75,16 +75,14 @@ func auth(next http.HandlerFunc) http.HandlerFunc {
 			// ...
 			token, err := jwt.Parse(jwtCookie, func(t *jwt.Token) (interface{}, error) {
 				if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-					return nil, fmt.Errorf("неверный метод подписи")
+					return nil, fmt.Errorf("incorrect signature method")
 				}
 				return []byte(secretKey), nil
 			})
-			if err != nil {
-				writeError(w, "Error parsing token", http.StatusInternalServerError)
-				return
-			}
+
 			valid = token.Valid
-			if !valid {
+
+			if err != nil || !valid {
 				// возвращаем ошибку авторизации 401
 				http.Error(w, "Authentification required", http.StatusUnauthorized)
 				return

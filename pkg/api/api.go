@@ -14,4 +14,5 @@ func Init() {
 	http.HandleFunc("/api/task/done", auth(taskDoneHandler))
 
 	http.Handle("/", http.FileServer(http.Dir(webDir)))
+
 }
