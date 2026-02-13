@@ -85,11 +85,16 @@ func auth(next http.HandlerFunc) http.HandlerFunc {
 				return []byte(secretKey), nil
 			})
 
-			valid = token.Valid
+			if err != nil {
+				http.Error(w, "Authentification required", http.StatusUnauthorized)
+				return
+			}
+			if token != nil {
+				valid = token.Valid
+			}
 
-			if err != nil || !valid {
+			if !valid {
 				// возвращаем ошибку авторизации 401
-
 				http.Error(w, "Authentification required", http.StatusUnauthorized)
 				return
 			}
