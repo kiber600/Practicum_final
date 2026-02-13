@@ -228,6 +228,9 @@ func afterNow(nextDate time.Time, now time.Time) bool {
 
 func weekDay(now time.Time, date time.Time, day int) (string, error) {
 	const daysInWeek = 7
+	if date.Before(now) {
+		date = now
+	}
 
 	if day < 1 || day > 7 {
 		return "", fmt.Errorf("invalid day of week")

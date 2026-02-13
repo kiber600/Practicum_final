@@ -30,7 +30,7 @@ func AddTask(task *Task) (int64, error) {
 	if err == nil {
 		id, err = res.LastInsertId()
 	}
-	return id, fmt.Errorf("Insert error: %w\n", err)
+	return id, nil
 }
 
 func Tasks(limit int) ([]*Task, error) {
