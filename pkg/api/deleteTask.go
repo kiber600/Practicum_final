@@ -14,12 +14,12 @@ func deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(idUrl)
 	if err != nil {
 		log.Printf("Convert id: %v\n", err)
-		writeError(w, "Id invalid", http.StatusMisdirectedRequest)
+		writeError(w, "Id invalid", http.StatusBadRequest)
 		return
 	}
 	if id < 0 {
 		log.Println("ID must be positive")
-		writeError(w, "ID must be positive", http.StatusMisdirectedRequest)
+		writeError(w, "ID must be positive", http.StatusBadRequest)
 		return
 	}
 

@@ -50,7 +50,7 @@ func addTaskHandler(w http.ResponseWriter, r *http.Request) {
 	err = checkDate(&task)
 	if err != nil {
 		log.Printf("Error check date: %v\n", err)
-		writeError(w, err.Error(), http.StatusMisdirectedRequest)
+		writeError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -59,14 +59,14 @@ func addTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Printf("Error: %v\n", err)
-		writeError(w, err.Error(), http.StatusNotImplemented)
+		writeError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	respJson, err := json.Marshal(resp)
 	if err != nil {
 		log.Printf("Error Marshal JSON: %v\n", err)
-		writeError(w, err.Error(), http.StatusNotImplemented)
+		writeError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")

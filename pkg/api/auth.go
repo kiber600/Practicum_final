@@ -29,7 +29,7 @@ func signinHandler(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&requ)
 	if err != nil {
-		log.Printf("Invalid JSON: %w\n", err.Error())
+		log.Printf("Invalid JSON: %v\n", err.Error())
 		writeError(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
@@ -49,7 +49,7 @@ func signinHandler(w http.ResponseWriter, r *http.Request) {
 	signedToken, err := token.SignedString([]byte(secretKey))
 	if err != nil {
 		log.Println("Failed generate token")
-		writeError(w, "Failed generate token", http.StatusNotImplemented)
+		writeError(w, "Failed generate token", http.StatusInternalServerError)
 		return
 	}
 

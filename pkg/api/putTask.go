@@ -21,14 +21,14 @@ func putHandler(w http.ResponseWriter, r *http.Request) {
 
 	if task.Title == "" {
 		log.Println("Title is empty")
-		writeError(w, "Title is empty", http.StatusMisdirectedRequest)
+		writeError(w, "Title is empty", http.StatusBadRequest)
 		return
 	}
 
 	err = checkDate(&task)
 	if err != nil {
 		log.Printf("Error check date: %v\n", err.Error())
-		writeError(w, err.Error(), http.StatusBadRequest)
+		writeError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 

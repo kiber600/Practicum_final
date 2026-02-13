@@ -12,13 +12,13 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		log.Printf("Convert id to int: %v\n", err)
-		writeError(w, err.Error(), http.StatusNotImplemented)
+		writeError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	if id < 0 {
 		log.Println("ID must be positive")
-		writeError(w, "ID must be positive", http.StatusMisdirectedRequest)
+		writeError(w, "ID must be positive", http.StatusBadRequest)
 		return
 	}
 
@@ -26,7 +26,7 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Printf("Error get task: %v\n", err)
-		writeError(w, "Task not found", http.StatusNotFound)
+		writeError(w, "Task not found", http.StatusInternalServerError)
 		return
 	}
 	writeJson(w, t)
