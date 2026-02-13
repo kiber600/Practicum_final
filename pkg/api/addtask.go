@@ -3,6 +3,8 @@ package api
 import (
 	"Practicum_final/pkg/db"
 	"encoding/json"
+	"fmt"
+	"log"
 	"net/http"
 	"time"
 )
@@ -17,6 +19,9 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 		deleteTaskHandler(w, r)
 	case http.MethodPut:
 		putHandler(w, r)
+	default:
+		log.Println("Method not allowed")
+		writeError(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
 
 }
@@ -28,12 +33,14 @@ func addTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&task)
 	if err != nil {
+		log.Printf("Invalid JSON: %w\n", err.Error())
 		writeError(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
 
 	if task.Title == "" {
-		writeError(w, "Title is empty", http.StatusBadRequest)
+		log.Println("Title is empty")
+		writeError(w, "Title is empty", http.StatusMisdirectedRequest)
 		return
 	}
 
@@ -42,7 +49,8 @@ func addTaskHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	err = checkDate(&task)
 	if err != nil {
-		writeError(w, err.Error(), http.StatusBadRequest)
+		log.Printf("Error check date: %v\n", err)
+		writeError(w, err.Error(), http.StatusMisdirectedRequest)
 		return
 	}
 
@@ -50,13 +58,15 @@ func addTaskHandler(w http.ResponseWriter, r *http.Request) {
 	resp["id"], err = db.AddTask(&task)
 
 	if err != nil {
-		writeJson(w, err.Error())
+		log.Printf("Error: %v\n", err)
+		writeError(w, err.Error(), http.StatusNotImplemented)
 		return
 	}
 
 	respJson, err := json.Marshal(resp)
 	if err != nil {
-		writeJson(w, err)
+		log.Printf("Error Marshal JSON: %v\n", err)
+		writeError(w, err.Error(), http.StatusNotImplemented)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -77,13 +87,13 @@ func checkDate(task *db.Task) error {
 
 	t, err := time.Parse(dateFormat, task.Date)
 	if err != nil {
-		return err
+		return fmt.Errorf("Error parsing date: %w\n", err)
 	}
 
 	if now.After(t) && task.Repeat != "" {
 		nextD, err := nextDate(now, task.Date, task.Repeat)
 		if err != nil {
-			return err
+			return fmt.Errorf("Error getting next date: %w\n", err)
 		}
 		task.Date = nextD
 	}
@@ -104,6 +114,7 @@ func writeJson(w http.ResponseWriter, data any) {
 
 	jsonData, err := json.Marshal(data)
 	if err != nil {
+		log.Println("Failed to marshal JSON")
 		w.WriteHeader(http.StatusInternalServerError)
 		errorResponse := map[string]string{"error": "Failed to marshal JSON"}
 		json.NewEncoder(w).Encode(errorResponse)

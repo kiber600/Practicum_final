@@ -2,6 +2,7 @@ package api
 
 import (
 	"Practicum_final/pkg/db"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -12,17 +13,20 @@ func deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(idUrl)
 	if err != nil {
-		writeError(w, "Id invalid", http.StatusBadRequest)
+		log.Printf("Convert id: %v\n", err)
+		writeError(w, "Id invalid", http.StatusMisdirectedRequest)
 		return
 	}
 	if id < 0 {
-		writeError(w, "ID must be positive", http.StatusBadRequest)
+		log.Println("ID must be positive")
+		writeError(w, "ID must be positive", http.StatusMisdirectedRequest)
 		return
 	}
 
 	err = db.DeleteTask(id)
 	if err != nil {
-		writeError(w, "Delete error", http.StatusBadRequest)
+		log.Printf("Delete task error: %v\n", err)
+		writeError(w, "Delete error", http.StatusNotFound)
 		return
 	}
 

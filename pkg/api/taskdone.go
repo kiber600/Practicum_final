@@ -18,17 +18,20 @@ func taskDoneHandler(w http.ResponseWriter, r *http.Request) {
 	idUrl := r.URL.Query().Get("id")
 
 	if idUrl == "" {
-		writeError(w, "ID is required", http.StatusBadRequest)
+		log.Println("ID is required")
+		writeError(w, "ID is required", http.StatusMisdirectedRequest)
 		return
 	}
 
 	id, err := strconv.Atoi(idUrl)
 	if err != nil {
-		writeError(w, "Id invalid", http.StatusBadRequest)
+		log.Printf("Convert id to int: %v\n", err)
+		writeError(w, "Id invalid", http.StatusConflict)
 		return
 	}
 	if id < 0 {
-		writeError(w, "ID must be positive", http.StatusBadRequest)
+		log.Println("ID must be positive")
+		writeError(w, "ID must be positive", http.StatusConflict)
 		return
 	}
 
@@ -36,15 +39,16 @@ func taskDoneHandler(w http.ResponseWriter, r *http.Request) {
 	var nextD string
 
 	task, err := db.GetTask(id)
-	log.Println(task)
 	if err != nil {
+		log.Printf("Error get task: %v\n", err)
 		writeError(w, "No data with this id was found", http.StatusNotFound)
 		return
 	}
 	if task.Repeat == "" {
 		err = db.DeleteTask(id)
 		if err != nil {
-			writeError(w, "Error delete task", http.StatusBadRequest)
+			log.Printf("Error delete task: %v\n", err)
+			writeError(w, "Error delete task", http.StatusMisdirectedRequest)
 			return
 		}
 		w.Write([]byte("{}"))
@@ -54,12 +58,14 @@ func taskDoneHandler(w http.ResponseWriter, r *http.Request) {
 
 	nextD, err = nextDate(now, task.Date, task.Repeat)
 	if err != nil {
+		log.Printf("Error getting next date: %v\n", err)
 		writeError(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
 	err = db.UpdateDate(nextD, id)
 	if err != nil {
+		log.Printf("Error update task: %v\n", err)
 		writeError(w, err.Error(), http.StatusBadRequest)
 		return
 	}

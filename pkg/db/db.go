@@ -52,7 +52,6 @@ func createDb() error {
 
 	db, err = sql.Open("sqlite", os.Getenv("TODO_DBFILE"))
 	if err != nil {
-		log.Println("Error: ", err.Error(), ": ", "scheduler.db")
 		return err
 	}
 	_, err = db.Exec(schema)
@@ -72,7 +71,6 @@ func openDb() error {
 
 	db, err = sql.Open("sqlite", os.Getenv("TODO_DBFILE"))
 	if err != nil {
-		log.Println("Error: ", err.Error(), ": ", "scheduler.db")
 		return err
 	}
 

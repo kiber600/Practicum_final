@@ -23,11 +23,13 @@ func nextDayHandler(w http.ResponseWriter, r *http.Request) {
 	repeat := r.URL.Query().Get("repeat")
 
 	if now == "" {
+		log.Println("Empty date now")
 		http.Error(w, "Empty date now", http.StatusBadRequest)
 		return
 	}
 	if repeat == "" {
-		http.Error(w, "Empty date dstart", http.StatusBadRequest)
+		log.Println("Empty date repeat")
+		http.Error(w, "Empty date repeat", http.StatusBadRequest)
 		return
 	}
 
@@ -37,12 +39,14 @@ func nextDayHandler(w http.ResponseWriter, r *http.Request) {
 
 	nowTime, err := time.Parse(dateFormat, now)
 	if err != nil {
+		fmt.Printf("Error parsing time: %v\n", err)
 		http.Error(w, "Invalid date now", http.StatusBadRequest)
 		return
 	}
 
 	nextDt, err := nextDate(nowTime, dstart, repeat)
 	if err != nil {
+		fmt.Printf("Error getting naxt date: %v\n", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -60,8 +64,8 @@ func nextDate(now time.Time, dstart string, repeat string) (string, error) {
 
 	date, err := time.Parse(dateFormat, dstart)
 	if err != nil {
-		log.Println(err)
-		return "", err
+
+		return "", fmt.Errorf("Error parsing time in nextDate: %v\n", err)
 	}
 
 	splitRepeat := strings.Split(repeat, " ")
@@ -76,13 +80,13 @@ func nextDate(now time.Time, dstart string, repeat string) (string, error) {
 		} else {
 			num, err = strconv.Atoi(splitRepeat[1])
 			if err != nil {
-				log.Println("Repeat value is not correct(days)")
-				return "", err
+
+				return "", fmt.Errorf("Repeat value is not correct(days): %v\n", err)
 			}
 		}
 		nextDate, err := addDay(now, date, num)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("Error in nextDate: %v\n", err)
 		}
 		return nextDate, nil
 
@@ -90,7 +94,7 @@ func nextDate(now time.Time, dstart string, repeat string) (string, error) {
 		num = 1
 		nextDate, err := addYear(now, date, num)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("Error in nextDate: %v\n", err)
 		}
 		return nextDate, nil
 
@@ -107,12 +111,12 @@ func nextDate(now time.Time, dstart string, repeat string) (string, error) {
 			for _, day := range days {
 				num, err := strconv.Atoi(day)
 				if err != nil {
-					return "", err
+					return "", fmt.Errorf("Repeat value is not correct(months): %v\n", err)
 				}
 
 				nextDate, err := nextMonth(now, date, num)
 				if err != nil {
-					return "", err
+					return "", fmt.Errorf("Error in nextDate: %v\n", err)
 				}
 				resultDays = append(resultDays, nextDate)
 			}
@@ -129,13 +133,13 @@ func nextDate(now time.Time, dstart string, repeat string) (string, error) {
 			for _, day := range days {
 				num, err = strconv.Atoi(day)
 				if err != nil {
-					return "", err
+					return "", fmt.Errorf("Repeat day value is not correct(months): %v\n", err)
 				}
 
 				for _, month := range months {
 					mon, err := strconv.Atoi(month)
 					if err != nil {
-						return "", err
+						return "", fmt.Errorf("Repeat months value is not correct(months): %v\n", err)
 					}
 					nextDate, err := certainMonths(now, date, mon, num)
 					if err != nil {
@@ -167,12 +171,12 @@ func nextDate(now time.Time, dstart string, repeat string) (string, error) {
 		for _, days := range splitDate {
 			num, err = strconv.Atoi(days)
 			if err != nil {
-				return "", err
+				return "", fmt.Errorf("Repeat  value is not correct(week): %v\n", err)
 			}
 
 			nextDate, err := weekDay(now, date, num)
 			if err != nil {
-				return "", err
+				return "", fmt.Errorf("Error getting next date (week): %v\n", err)
 			}
 			weekDays = append(weekDays, nextDate)
 

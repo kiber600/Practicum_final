@@ -2,6 +2,7 @@ package api
 
 import (
 	"Practicum_final/pkg/db"
+	"log"
 	"net/http"
 )
 
@@ -12,7 +13,8 @@ type TasksResp struct {
 func tasksHandler(w http.ResponseWriter, r *http.Request) {
 	tasks, err := db.Tasks(50) // в параметре максимальное количество записей
 	if err != nil {
-		writeError(w, err.Error(), http.StatusBadRequest)
+		log.Printf("Error get tasks: %v\n", err)
+		writeError(w, err.Error(), http.StatusNotFound)
 		return
 	}
 	writeJson(w, TasksResp{

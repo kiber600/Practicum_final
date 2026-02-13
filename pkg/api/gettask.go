@@ -2,6 +2,7 @@ package api
 
 import (
 	"Practicum_final/pkg/db"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -10,19 +11,22 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 	idStr := r.URL.Query().Get("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		writeError(w, err.Error(), http.StatusBadRequest)
+		log.Printf("Convert id to int: %v\n", err)
+		writeError(w, err.Error(), http.StatusNotImplemented)
 		return
 	}
 
 	if id < 0 {
-		writeError(w, "ID must be positive", http.StatusBadRequest)
+		log.Println("ID must be positive")
+		writeError(w, "ID must be positive", http.StatusMisdirectedRequest)
 		return
 	}
 
 	t, err := db.GetTask(id)
 
 	if err != nil {
-		writeError(w, "Task not found", http.StatusBadRequest)
+		log.Printf("Error get task: %v\n", err)
+		writeError(w, "Task not found", http.StatusNotFound)
 		return
 	}
 	writeJson(w, t)

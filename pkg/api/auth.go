@@ -16,6 +16,7 @@ const secretKey string = "SecretKey"
 func signinHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != http.MethodPost {
+		log.Println("Method not allowed")
 		writeError(w, "Required POST method", http.StatusMethodNotAllowed)
 		return
 	}
@@ -28,11 +29,13 @@ func signinHandler(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&requ)
 	if err != nil {
+		log.Printf("Invalid JSON: %w\n", err.Error())
 		writeError(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
 
 	if requ.Password != pass {
+		log.Println("Invalid password")
 		writeError(w, "Invalid password", http.StatusUnauthorized)
 		return
 	}
@@ -45,7 +48,8 @@ func signinHandler(w http.ResponseWriter, r *http.Request) {
 
 	signedToken, err := token.SignedString([]byte(secretKey))
 	if err != nil {
-		writeError(w, "Failed generate token", http.StatusBadRequest)
+		log.Println("Failed generate token")
+		writeError(w, "Failed generate token", http.StatusNotImplemented)
 		return
 	}
 
@@ -75,6 +79,7 @@ func auth(next http.HandlerFunc) http.HandlerFunc {
 			// ...
 			token, err := jwt.Parse(jwtCookie, func(t *jwt.Token) (interface{}, error) {
 				if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+					log.Println("incorrect signature method")
 					return nil, fmt.Errorf("incorrect signature method")
 				}
 				return []byte(secretKey), nil
@@ -84,6 +89,7 @@ func auth(next http.HandlerFunc) http.HandlerFunc {
 
 			if err != nil || !valid {
 				// возвращаем ошибку авторизации 401
+
 				http.Error(w, "Authentification required", http.StatusUnauthorized)
 				return
 			}

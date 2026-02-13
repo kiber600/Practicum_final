@@ -30,7 +30,7 @@ func AddTask(task *Task) (int64, error) {
 	if err == nil {
 		id, err = res.LastInsertId()
 	}
-	return id, err
+	return id, fmt.Errorf("Insert error: %w\n", err)
 }
 
 func Tasks(limit int) ([]*Task, error) {
@@ -38,7 +38,7 @@ func Tasks(limit int) ([]*Task, error) {
 
 	rows, err := db.Query("SELECT id, date, title, comment, repeat from scheduler ORDER BY date DESC limit ?", limit)
 	if err != nil {
-		return res, err
+		return res, fmt.Errorf("In Tasks query row: %v\n", err)
 	}
 
 	for rows.Next() {
@@ -46,14 +46,14 @@ func Tasks(limit int) ([]*Task, error) {
 		err = rows.Scan(&s.ID, &s.Date, &s.Title, &s.Comment, &s.Repeat)
 
 		if err != nil {
-			return res, err
+			return res, fmt.Errorf("In Tasks rows scan: %v\n", err)
 		}
 		res = append(res, &s)
 
 	}
 	err = rows.Err()
 	if err != nil {
-		return res, err
+		return res, fmt.Errorf("In Tasks rows error: %v\n", err)
 	}
 
 	return res, nil
@@ -65,12 +65,12 @@ func GetTask(id int) (*Task, error) {
 	raw := db.QueryRow("Select * from scheduler where id = :id", sql.Named("id", id))
 	err := raw.Scan(&task.ID, &task.Date, &task.Title, &task.Comment, &task.Repeat)
 	if err != nil {
-		return task, err
+		return task, fmt.Errorf("In GetTask raw scan: %v\n", err)
 	}
 
 	err = raw.Err()
 	if err != nil {
-		return task, err
+		return task, fmt.Errorf("In GetTask raw error : %v\n", err)
 	}
 
 	return task, nil
@@ -81,7 +81,7 @@ func UpdateTask(task *Task) error {
 
 	id, err := strconv.ParseInt(task.ID, 10, 64)
 	if err != nil {
-		return err
+		return fmt.Errorf("Error parsing to int64 in UpdateTask: %v\n", err)
 	}
 	if id < 0 {
 		return fmt.Errorf("Id must be positive")
@@ -93,13 +93,13 @@ func UpdateTask(task *Task) error {
 		sql.Named("comment", task.Comment),
 		sql.Named("repeat", task.Repeat), sql.Named("id", id))
 	if err != nil {
-		return err
+		return fmt.Errorf("In UpdateTask Update error: %v\n", err)
 	}
 	// метод RowsAffected() возвращает количество записей к которым
 	// был применена SQL команда
 	count, err := res.RowsAffected()
 	if err != nil {
-		return err
+		return fmt.Errorf("No rows udated in UpdateTask: %v\n", err)
 	}
 	if count == 0 {
 		return fmt.Errorf(`incorrect id for updating task`)
@@ -112,12 +112,12 @@ func UpdateDate(nextDate string, id int) error {
 	query := `UPDATE scheduler SET date = :date where id = :id`
 	res, err := db.Exec(query, sql.Named("date", nextDate), sql.Named("id", id))
 	if err != nil {
-		return err
+		return fmt.Errorf("In UpdateDate Update error: %v\n", err)
 	}
 
 	count, err := res.RowsAffected()
 	if err != nil {
-		return err
+		return fmt.Errorf("No rows udated in UpdateDate: %v\n", err)
 	}
 	if count == 0 {
 		return fmt.Errorf(`incorrect id for updating task`)
@@ -130,7 +130,7 @@ func DeleteTask(id int) error {
 
 	_, err := db.Exec("Delete from scheduler where id = :id", sql.Named("id", id))
 	if err != nil {
-		return err
+		return fmt.Errorf("Delete task error: %n", err)
 	}
 
 	return nil

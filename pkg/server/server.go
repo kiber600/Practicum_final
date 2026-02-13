@@ -4,6 +4,7 @@ import (
 	"Practicum_final/pkg/api"
 	"Practicum_final/pkg/db"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
@@ -16,6 +17,7 @@ func StartServer() error {
 	err := db.CheckDbFile()
 
 	if err != nil {
+		log.Printf("Error db file: %v\n", err)
 		panic(err)
 	}
 	api.Init()
