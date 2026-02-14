@@ -85,6 +85,8 @@ func TestAddTask(t *testing.T) {
 	db := openDB(t)
 	defer db.Close()
 
+	//loginAndGetToken(t)
+
 	tbl := []task{
 		{"20240129", "", "", ""},
 		{"20240192", "Qwerty", "", ""},
@@ -169,3 +171,28 @@ func TestAddTask(t *testing.T) {
 		check()
 	}
 }
+
+/*func loginAndGetToken(t *testing.T) string {
+	body, err := requestJSON("api/signin", map[string]any{
+		"password": "1234",
+	}, http.MethodPost)
+
+	if err != nil {
+		t.Fatalf("Login error: %v", err)
+	}
+
+	var response map[string]string
+	if err := json.Unmarshal(body, &response); err != nil {
+		t.Fatalf("Answer error: %v", err)
+	}
+
+	token, ok := response["token"]
+	if !ok {
+		t.Fatal("Token not found")
+	}
+
+	Token = token
+	//t.Logf("Token received: %s...", token[:20])
+
+	return token
+}*/
